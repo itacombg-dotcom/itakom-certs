@@ -251,6 +251,7 @@ def pg4_warranty_card(s):
             row('Топлообменник БГВ',       'Danfoss', s['bgv_hex']),
             row('Циркулационна помпа БГВ', 'WILO',    s['pump_bgv']),
             row('Регулиращ вентил БГВ',    'Siemens', _bgv_vvg(s['dhw'])),
+            row('Сервозадвижка БГВ',       'Siemens', 'SAT31.51'),
             row('Водомер БГВ',             'Zenner',  'MTKD-Qn 4'),
         ]
 
