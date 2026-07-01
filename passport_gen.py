@@ -22,6 +22,19 @@ WILO_PDF     = os.path.join(BASE, 'Сертификати_Wilo.pdf')
 DANFOSS_PDF  = os.path.join(BASE, 'Сертификати_Danfoss.pdf')
 SHEMI_PDF    = os.path.join(BASE, 'SHEMI_AS.pdf')
 
+# Файлове с топлообменници
+TOPLOB_OP1 = '/Users/jeanpierre/Desktop/itakom-certs/ita com 26/ТОПЛООБМЕННИЦИ ОП1 ДАНФОС/Топлообменници ОП1.pdf'
+TOPLOB_OP2 = '/Users/jeanpierre/Desktop/itakom-certs/ita com 26/ТОПЛООБМЕННИЦИ ОП 2 ДАНФОС/Топлообменници ОП2.pdf'
+
+# Сертификати топлообменници: модел → (файл, idx стр.1, idx стр.2)
+HEX_CERTS = {
+    'XB12L-1-60':    (TOPLOB_OP1, 63,  64),
+    'XB12L-2-20/20': (TOPLOB_OP1, 65,  66),
+    'XB12L-1-80':    (TOPLOB_OP1, 106, 107),
+    'XB12L-1-110':   (TOPLOB_OP2, 259, 260),
+    'XB52M-1-60':    (TOPLOB_OP2, 279, 280),
+}
+
 # Техноописания (конвертирани от RTF с LibreOffice)
 TEHNOPIS = {
     '1H0W': os.path.join(BASE, 'Tehnopisanie1H1H.pdf'),
@@ -489,30 +502,34 @@ def build(s, out_path):
     writer.add_page(shemi_reader.pages[s['scheme_idx']])
 
     # Сертификати — зависят от типа станция
+    voi_cert = HEX_CERTS[s['voi_hex']]   # (файл, idx1, idx2)
+
     if s['dhw'] > 0:
-        # 1H2W: VVG ×2, XB ×2, ZRS
+        bgv_cert = HEX_CERTS[s['bgv_hex']]
         cert_pages = [
-            (SIEMENS_PDF, 0),   # RVD
-            (SIEMENS_PDF, 1),   # AVPB (Siemens PDF)
-            (SIEMENS_PDF, 2),   # VVG — ВОИ
-            (SIEMENS_PDF, 2),   # VVG — БГВ
-            (SIEMENS_PDF, 3),   # SAS
-            (WILO_PDF,    0),   # Yonos Maxo
-            (WILO_PDF,    1),   # ZRS
-            (DANFOSS_PDF, 0),   # XB — ВОИ
-            (DANFOSS_PDF, 0),   # XB — БГВ
-            (DANFOSS_PDF, 1),   # AVPB
+            (SIEMENS_PDF,    0),          # RVD
+            (SIEMENS_PDF,    1),          # AVPB (Siemens PDF)
+            (SIEMENS_PDF,    2),          # VVG — ВОИ
+            (SIEMENS_PDF,    2),          # VVG — БГВ
+            (SIEMENS_PDF,    3),          # SAS
+            (WILO_PDF,       0),          # Yonos Maxo
+            (WILO_PDF,       1),          # ZRS
+            (voi_cert[0],    voi_cert[1]),# XB ВОИ стр.1
+            (voi_cert[0],    voi_cert[2]),# XB ВОИ стр.2
+            (bgv_cert[0],    bgv_cert[1]),# XB БГВ стр.1
+            (bgv_cert[0],    bgv_cert[2]),# XB БГВ стр.2
+            (DANFOSS_PDF,    1),          # AVPB
         ]
     else:
-        # 1H0W: без ZRS, без втори VVG и XB
         cert_pages = [
-            (SIEMENS_PDF, 0),   # RVD
-            (SIEMENS_PDF, 1),   # AVPB (Siemens PDF)
-            (SIEMENS_PDF, 2),   # VVG
-            (SIEMENS_PDF, 3),   # SAS
-            (WILO_PDF,    0),   # Yonos Maxo
-            (DANFOSS_PDF, 0),   # XB
-            (DANFOSS_PDF, 1),   # AVPB
+            (SIEMENS_PDF,    0),          # RVD
+            (SIEMENS_PDF,    1),          # AVPB (Siemens PDF)
+            (SIEMENS_PDF,    2),          # VVG
+            (SIEMENS_PDF,    3),          # SAS
+            (WILO_PDF,       0),          # Yonos Maxo
+            (voi_cert[0],    voi_cert[1]),# XB ВОИ стр.1
+            (voi_cert[0],    voi_cert[2]),# XB ВОИ стр.2
+            (DANFOSS_PDF,    1),          # AVPB
         ]
 
     cert_readers = {}
@@ -571,7 +588,7 @@ STATIONS = [
 
     dict(num='i6L126',  type='1H2W', he=350, dhw=125, day='11',
          addr='ул.Дамянгруев, №10, Вх.1',
-         voi_hex='XB12L-1-120',       pump_voi='Yonos Maxo 40/0.5-12',
+         voi_hex='XB52M-1-60',       pump_voi='Yonos Maxo 40/0.5-12',
          vvg_valve='VVG 549.32-10K',  exp_vol=350,
          bgv_hex='XB12L-2-20/20',     pump_bgv='ZRS 15/16-130',
          scheme_idx=0,
@@ -579,7 +596,7 @@ STATIONS = [
 
     dict(num='i7L126',  type='1H2W', he=300, dhw=100, day='17',
          addr='ул.Владайска, №39',
-         voi_hex='XB12L-1-100',       pump_voi='Yonos Maxo 40/0.5-12',
+         voi_hex='XB12L-1-110',       pump_voi='Yonos Maxo 40/0.5-12',
          vvg_valve='VVG 549.32-10K',  exp_vol=300,
          bgv_hex='XB12L-2-20/20',     pump_bgv='ZRS 15/16-130',
          scheme_idx=0,
@@ -587,7 +604,7 @@ STATIONS = [
 
     dict(num='i8L126',  type='1H2W', he=350, dhw=175, day='18',
          addr='бул.Македония, №9',
-         voi_hex='XB12L-1-120',       pump_voi='Yonos Maxo 40/0.5-12',
+         voi_hex='XB52M-1-60',       pump_voi='Yonos Maxo 40/0.5-12',
          vvg_valve='VVG 549.32-10K',  exp_vol=350,
          bgv_hex='XB12L-2-20/20',     pump_bgv='ZRS 15/16-130',
          scheme_idx=0,
@@ -619,7 +636,7 @@ STATIONS = [
 
     dict(num='i12L126', type='1H2W', he=300, dhw=175, day='29',
          addr='ж.к.Лагера, №38, А',
-         voi_hex='XB12L-1-100',       pump_voi='Yonos Maxo 40/0.5-12',
+         voi_hex='XB12L-1-110',       pump_voi='Yonos Maxo 40/0.5-12',
          vvg_valve='VVG 549.32-10K',  exp_vol=300,
          bgv_hex='XB12L-2-20/20',     pump_bgv='ZRS 15/16-130',
          scheme_idx=0,
@@ -635,7 +652,7 @@ STATIONS = [
 
     dict(num='i14L126', type='1H2W', he=300, dhw=200, day='01', month='юли',
          addr='ул.Лерин, №3, А',
-         voi_hex='XB12L-1-100',       pump_voi='Yonos Maxo 40/0.5-12',
+         voi_hex='XB12L-1-110',       pump_voi='Yonos Maxo 40/0.5-12',
          vvg_valve='VVG 549.32-10K',  exp_vol=300,
          bgv_hex='XB12L-2-20/20',     pump_bgv='ZRS 15/16-130',
          scheme_idx=0,
